@@ -50,7 +50,7 @@ public class BookCategoryService {
 //    }
 
     @Transactional
-    public Book saveBookWithCategories(String title, List<String> categoryNames) {
+    public Book saveBookWithCategories(String title, List<String> categoryNames, boolean throwError) {
         List<Category> categories = categoryNames.stream()
                 .map(name -> categoryRepository.findCategoryByCategoryName(name)
                         .orElseGet(() -> categoryRepository.save(new Category(null, name, null, new ArrayList<>())))
@@ -61,7 +61,12 @@ public class BookCategoryService {
         book.setAuthor("Author " + title);
         book.setYearPublished(2023);
         book.setCategories(categories);
+        bookRepository.save(book);
 
-        return bookRepository.save(book);
+        if (throwError) {
+            throw new RuntimeException("Simulate rollback");
+        } else {
+            return book;
+        }
     }
 }

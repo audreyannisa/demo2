@@ -67,14 +67,30 @@ public class BookController {
 //    }
 
 
-    @PostMapping("/many-to-many")
-    public ResponseEntity<ApiResponse<Book>> createManyToManyBook(
+    @PostMapping("/success")
+    public ResponseEntity<ApiResponse<Book>> createManyToManyBookSuccess(
             @RequestParam String title,
             @RequestParam List<String> categories) {
 
-        Book book = bookCategoryService.saveBookWithCategories(title, categories);
-        return ResponseEntity.ok(new ApiResponse<>("Book with categories saved", book));
+        logger.info("[SUCCESS] save book {}", title);
+
+        try {
+            Book savedBook = bookCategoryService.saveBookWithCategories(title, categories, false);
+            return ResponseEntity.ok(new ApiResponse<>("Book with categories saved", savedBook));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>("Internal server error: " + ex.getMessage(), null));
+        }
     }
+
+    @PostMapping("/failed")
+    public void createManyToManyBookFailed(
+            @RequestParam String title,
+            @RequestParam List<String> categories) {
+        logger.info("[FAILED] save book {}", title);
+        bookCategoryService.saveBookWithCategories(title, categories, true);
+    }
+
 
 
 }
